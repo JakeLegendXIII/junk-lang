@@ -2,8 +2,17 @@ package main
 
 import (
 	"fmt"
+	"junk/repl"
+	"os"
+	"os/user"
 )
 
 func main() {
-	fmt.Printf("Hello World! This is the junk programming language")
+	user, err := user.Current()
+	if err != nil {
+		panic(err)
+	}
+	fmt.Printf("Hello %s! This is the junk programming language!\n", user.Username)
+	fmt.Printf("Feel free to type in commands\n")
+	repl.Start(os.Stdin, os.Stdout)
 }
