@@ -12,6 +12,17 @@ type (
 	infixParseFn  func(ast.Expression) ast.Expression
 )
 
+const (
+	_ int = iota // ignore first value by assigning to blank identifier
+	LOWEST
+	EQUALS      // ==
+	LESSGREATER // > or <
+	SUM         // +
+	PRODUCT     // *
+	PREFIX      // -X or !X
+	CALL        // myFunction(X)
+)
+
 type Parser struct {
 	l      *lexer.Lexer
 	errors []string
@@ -29,11 +40,18 @@ func New(l *lexer.Lexer) *Parser {
 		errors: []string{},
 	}
 
+	p.prefixParseFns = make(map[token.TokenType]prefixParseFn) // initialize map
+	p.registerPrefix(token.IDENT, p.parseIdentifier)           // register identifier parse function
+
 	// Read two tokens, so curToken and peekToken are both set
 	p.nextToken()
 	p.nextToken()
 
 	return p
+}
+
+func (p *Parser) parseIdentifier() ast.Expression {
+	return &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal} // initialize identifier
 }
 
 func (p *Parser) Errors() []string { // return errors
@@ -67,7 +85,7 @@ func (p *Parser) parseStatement() ast.Statement {
 	case token.RETURN:
 		return p.parseReturnStatement()
 	default:
-		return nil
+		return p.parseExpressionStatement() // parse expression statement
 	}
 }
 
@@ -105,6 +123,28 @@ func (p *Parser) parseReturnStatement() *ast.ReturnStatement { // parse return s
 	}
 
 	return stmt
+}
+
+func (p *Parser) parseExpressionStatement() *ast.ExpressionStatement { // parse expression statement
+	stmt := &ast.ExpressionStatement{Token: p.curToken} // initialize expression statement
+
+	stmt.Expression = p.parseExpression(LOWEST) // parse expression
+
+	if p.peekTokenIs(token.SEMICOLON) { // check next token type
+		p.nextToken()
+	}
+
+	return stmt
+}
+
+func (p *Parser) parseExpression(precedence int) ast.Expression {
+	prefix := p.prefixParseFns[p.curToken.Type] // get prefix parse function
+	if prefix == nil {                          // check if prefix parse function exists
+		return nil
+	}
+	leftExp := prefix() // parse prefix expression
+
+	return leftExp
 }
 
 func (p *Parser) curTokenIs(t token.TokenType) bool { // check current token type
