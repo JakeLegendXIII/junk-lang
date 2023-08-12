@@ -60,6 +60,7 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerPrefix(token.TRUE, p.parseBoolean)               // register boolean parse function
 	p.registerPrefix(token.FALSE, p.parseBoolean)              // register boolean parse function
 	p.registerPrefix(token.LPAREN, p.parseGroupedExpression)   // register grouped expression parse function
+	p.registerPrefix(token.IF, p.parseIfExpression)            // register if expression parse function
 
 	p.infixParseFns = make(map[token.TokenType]infixParseFn) // initialize map
 	p.registerInfix(token.PLUS, p.parseInfixExpression)      // register infix expression parse function
@@ -84,6 +85,57 @@ func (p *Parser) parseIdentifier() ast.Expression {
 
 func (p *Parser) parseBoolean() ast.Expression {
 	return &ast.Boolean{Token: p.curToken, Value: p.curTokenIs(token.TRUE)} // initialize boolean
+}
+
+func (p *Parser) parseIfExpression() ast.Expression {
+	expression := &ast.IfExpression{Token: p.curToken} // initialize if expression
+
+	if !p.expectPeek(token.LPAREN) { // check next token type
+		return nil
+	}
+
+	p.nextToken()
+
+	expression.Condition = p.parseExpression(LOWEST) // parse expression
+
+	if !p.expectPeek(token.RPAREN) { // check next token type
+		return nil
+	}
+
+	if !p.expectPeek(token.LBRACE) { // check next token type
+		return nil
+	}
+
+	expression.Consequence = p.parseBlockStatement() // parse block statement
+
+	if p.peekTokenIs(token.ELSE) { // check next token type
+		p.nextToken()
+
+		if !p.expectPeek(token.LBRACE) { // check next token type
+			return nil
+		}
+
+		expression.Alternative = p.parseBlockStatement() // parse block statement
+	}
+
+	return expression
+}
+
+func (p *Parser) parseBlockStatement() *ast.BlockStatement {
+	block := &ast.BlockStatement{Token: p.curToken} // initialize block statement
+	block.Statements = []ast.Statement{}            // initialize empty slice
+
+	p.nextToken()
+
+	for !p.curTokenIs(token.RBRACE) { // check current token type
+		stmt := p.parseStatement()
+		if stmt != nil {
+			block.Statements = append(block.Statements, stmt) // append to slice
+		}
+		p.nextToken()
+	}
+
+	return block
 }
 
 func (p *Parser) parseGroupedExpression() ast.Expression {
