@@ -6,7 +6,7 @@ import (
 
 type Lexer struct {
 	input        string
-	postion      int  // current position in input (points to current char)
+	position     int  // current position in input (points to current char)
 	readPosition int  // current reading position in input (after current char)
 	ch           byte // channel of chars being read
 }
@@ -65,6 +65,9 @@ func (l *Lexer) NextToken() token.Token {
 		tok = newToken(token.LT, l.ch)
 	case '>':
 		tok = newToken(token.GT, l.ch)
+	case '"':
+		tok.Type = token.STRING
+		tok.Literal = l.readString()
 	case 0:
 		tok.Literal = ""
 		tok.Type = token.EOF
@@ -97,24 +100,24 @@ func (l *Lexer) readChar() {
 		l.ch = l.input[l.readPosition]
 	}
 
-	l.postion = l.readPosition
+	l.position = l.readPosition
 	l.readPosition += 1
 }
 
 func (l *Lexer) readNumber() string { // helper function
-	position := l.postion
+	position := l.position
 	for isDigit(l.ch) {
 		l.readChar()
 	}
-	return l.input[position:l.postion]
+	return l.input[position:l.position]
 }
 
 func (l *Lexer) readIdentifier() string { // helper function
-	position := l.postion
+	position := l.position
 	for isLetter(l.ch) {
 		l.readChar()
 	}
-	return l.input[position:l.postion]
+	return l.input[position:l.position]
 }
 
 func isLetter(ch byte) bool { // helper function
@@ -137,4 +140,16 @@ func (l *Lexer) peekChar() byte { // helper function
 	} else {
 		return l.input[l.readPosition]
 	}
+}
+
+func (l *Lexer) readString() string {
+	position := l.position + 1
+	for {
+		l.readChar()
+		if l.ch == '"' || l.ch == 0 {
+			break
+		}
+	}
+
+	return l.input[position:l.position]
 }
