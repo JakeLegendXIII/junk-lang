@@ -1,0 +1,26 @@
+let reduce = func(arr, initial, f) {
+    let iter = func(arr, result) {
+        if (len(arr) == 0) {
+            result
+        } else {
+            iter(rest(arr), f(result, first(arr)));
+        }
+    };
+
+    iter(arr, initial);
+};
+
+let reduce = func(arr, initial, f) { let iter = func(arr, result) { if (len(arr) == 0) { result } else { iter(rest(arr), f(result, first(arr))); } }; iter(arr, initial); };
+
+let sum = func(arr) {
+    reduce(arr, 0, func(initial, el) { initial + el });    
+};
+
+
+let sum = func(arr) { reduce(arr, 0, func(initial, el) { initial + el }); };
+
+
+>> let reduce = func(arr, initial, f) { let iter = func(arr, result) { if (len(arr) == 0) { result } else { iter(rest(arr), f(result, first(arr))); } }; iter(arr, initial); };
+>> let sum = func(arr) { reduce(arr, 0, func(initial, el) { initial + el }); };
+>> sum([1, 2, 3, 4, 5]);
+15
