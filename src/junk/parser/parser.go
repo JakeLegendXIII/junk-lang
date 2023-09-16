@@ -67,6 +67,7 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerPrefix(token.FUNCTION, p.parseFunctionLiteral)   // register function literal parse function
 	p.registerPrefix(token.STRING, p.parseStringLiteral)       // register string literal parse function
 	p.registerPrefix(token.LBRACKET, p.parseArrayLiteral)      // register array literal parse function
+	p.registerPrefix(token.LBRACE, p.parseHashLiteral)         // register hash literal parse function
 
 	p.infixParseFns = make(map[token.TokenType]infixParseFn) // initialize map
 	p.registerInfix(token.PLUS, p.parseInfixExpression)      // register infix expression parse function
@@ -241,6 +242,35 @@ func (p *Parser) parseArrayLiteral() ast.Expression {
 	array := &ast.ArrayLiteral{Token: p.curToken}          // initialize array literal
 	array.Elements = p.parseExpressionList(token.RBRACKET) // parse expression list
 	return array
+}
+
+func (p *Parser) parseHashLiteral() ast.Expression {
+	hash := &ast.HashLiteral{Token: p.curToken} // initialize hash literal
+	hash.Pairs = make(map[ast.Expression]ast.Expression)
+
+	for !p.peekTokenIs(token.RBRACE) { // check next token type
+		p.nextToken()
+		key := p.parseExpression(LOWEST) // parse expression
+
+		if !p.expectPeek(token.COLON) { // check next token type
+			return nil
+		}
+
+		p.nextToken()
+		value := p.parseExpression(LOWEST) // parse expression
+
+		hash.Pairs[key] = value
+
+		if !p.peekTokenIs(token.RBRACE) && !p.expectPeek(token.COMMA) { // check next token type
+			return nil
+		}
+	}
+
+	if !p.expectPeek(token.RBRACE) { // check next token type
+		return nil
+	}
+
+	return hash
 }
 
 func (p *Parser) parseExpressionList(end token.TokenType) []ast.Expression {
