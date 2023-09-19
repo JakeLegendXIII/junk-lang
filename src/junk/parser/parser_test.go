@@ -968,3 +968,27 @@ func TestParsingHashLiteralsWithExpressions(t *testing.T) {
 		testFunc(value)
 	}
 }
+
+func TestWhileLoopStatementParsing(t *testing.T) {
+	input := `while (x < 10) { }`
+
+	l := lexer.New(input)
+	p := New(l)
+	program := p.ParseProgram()
+	checkParserErrors(t, p) // check for errors
+
+	if len(program.Statements) != 1 {
+		t.Fatalf("program.Statements does not contain 1 statements. Got: %d", len(program.Statements))
+	}
+
+	whileLoop, ok := program.Statements[0].(*ast.WhileStatement)
+	if !ok {
+		t.Fatalf("stmt is not *ast.WhileStatement. Got: %T", program.Statements[0])
+	}
+
+	testInfixExpression(t, whileLoop.Condition, "x", "<", "5")
+
+	if len(whileLoop.Body.Statements) != 0 {
+		t.Errorf("whileLoop.Body.Statements has not 0 statements. Got: %d", len(whileLoop.Body.Statements))
+	}
+}

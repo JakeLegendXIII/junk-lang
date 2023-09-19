@@ -145,6 +145,7 @@ if (5 < 10) {
 "foo bar"
 [1, 2];
 {"foo": "bar"}
+while (x < 5) { }
 `
 
 	tests := []struct {
@@ -236,6 +237,14 @@ if (5 < 10) {
 		{token.STRING, "foo"},
 		{token.COLON, ":"},
 		{token.STRING, "bar"},
+		{token.RBRACE, "}"},
+		{token.WHILE, "while"},
+		{token.LPAREN, "("},
+		{token.IDENT, "x"},
+		{token.LT, "<"},
+		{token.INT, "5"},
+		{token.RPAREN, ")"},
+		{token.LBRACE, "{"},
 		{token.RBRACE, "}"},
 		{token.EOF, ""},
 	}
