@@ -970,7 +970,7 @@ func TestParsingHashLiteralsWithExpressions(t *testing.T) {
 }
 
 func TestWhileLoopStatementParsing(t *testing.T) {
-	input := `while (x < 10) { }`
+	input := `while (x < 5) { }`
 
 	l := lexer.New(input)
 	p := New(l)
@@ -986,7 +986,7 @@ func TestWhileLoopStatementParsing(t *testing.T) {
 		t.Fatalf("stmt is not *ast.WhileStatement. Got: %T", program.Statements[0])
 	}
 
-	testInfixExpression(t, whileLoop.Condition, "x", "<", "5")
+	testInfixExpression(t, whileLoop.Condition, "x", "<", 5)
 
 	if len(whileLoop.Body.Statements) != 0 {
 		t.Errorf("whileLoop.Body.Statements has not 0 statements. Got: %d", len(whileLoop.Body.Statements))

@@ -347,9 +347,9 @@ func (ws *WhileStatement) TokenLiteral() string { return ws.Token.Literal }
 func (ws *WhileStatement) String() string {
 	var out bytes.Buffer // buffer is a sequence of bytes
 
-	out.WriteString("while ")
+	out.WriteString("while (")
 	out.WriteString(ws.Condition.String())
-	out.WriteString(" ")
+	out.WriteString(") ")
 	out.WriteString(ws.Body.String())
 
 	return out.String()

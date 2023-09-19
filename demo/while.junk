@@ -1,0 +1,19 @@
+let helloTimes = func(name, times) { 
+    let i = 0; 
+    while (i < times) 
+    { 
+        puts("hello " + name); let i = i + 1; 
+    } 
+};
+
+
+//let helloTimes = func(name, times) { let i = 0; while (i < times) { puts("hello " + name); let i = i + 1; } };
+// helloTimes("jake" 3);
+
+>> let helloTimes = func(name, times) { let i = 0; while (i < times) { puts("hello " + name); let i = i + 1; } };
+>> helloTimes("jake", 3);
+hello jake
+hello jake
+hello jake
+null
+>> 

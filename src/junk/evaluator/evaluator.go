@@ -39,6 +39,9 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 		}
 		env.Set(node.Name.Value, val)
 
+	case *ast.WhileStatement:
+		return evalWhileExpression(node, env)
+
 	case *ast.Identifier:
 		return evalIdentifier(node, env)
 	// Expressions
@@ -148,6 +151,21 @@ func evalBlockStatement(block *ast.BlockStatement, env *object.Environment) obje
 	}
 
 	return result
+}
+
+func evalWhileExpression(we *ast.WhileStatement, env *object.Environment) object.Object {
+	condition := Eval(we.Condition, env)
+
+	if isError(condition) {
+		return condition
+	}
+
+	for isTruthy(condition) {
+		Eval(we.Body, env)
+		condition = Eval(we.Condition, env)
+	}
+
+	return NULL
 }
 
 func nativeBoolToBooleanObject(input bool) *object.Boolean {
