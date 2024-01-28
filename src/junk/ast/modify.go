@@ -47,6 +47,20 @@ func Modify(node Node, modifier ModifierFunc) Node {
 			node.Parameters[i], _ = Modify(node.Parameters[i], modifier).(*Identifier)
 		}
 		node.Body, _ = Modify(node.Body, modifier).(*BlockStatement)
+
+	case *ArrayLiteral:
+		for i, _ := range node.Elements {
+			node.Elements[i], _ = Modify(node.Elements[i], modifier).(Expression)
+		}
+
+	case *HashLiteral:
+		newPairs := make(map[Expression]Expression)
+		for key, val := range node.Pairs {
+			newKey, _ := Modify(key, modifier).(Expression)
+			newVal, _ := Modify(val, modifier).(Expression)
+			newPairs[newKey] = newVal
+		}
+		node.Pairs = newPairs
 	}
 
 	return modifier(node)
