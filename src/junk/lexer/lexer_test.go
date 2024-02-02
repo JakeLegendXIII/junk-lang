@@ -146,6 +146,7 @@ if (5 < 10) {
 [1, 2];
 {"foo": "bar"}
 while (x < 5) { }
+macro(x, y) { x + y; };
 `
 
 	tests := []struct {
@@ -246,6 +247,19 @@ while (x < 5) { }
 		{token.RPAREN, ")"},
 		{token.LBRACE, "{"},
 		{token.RBRACE, "}"},
+		{token.MACRO, "macro"},
+		{token.LPAREN, "("},
+		{token.IDENT, "x"},
+		{token.COMMA, ","},
+		{token.IDENT, "y"},
+		{token.RPAREN, ")"},
+		{token.LBRACE, "{"},
+		{token.IDENT, "x"},
+		{token.PLUS, "+"},
+		{token.IDENT, "y"},
+		{token.SEMICOLON, ";"},
+		{token.RBRACE, "}"},
+		{token.SEMICOLON, ";"},
 		{token.EOF, ""},
 	}
 
