@@ -50,6 +50,7 @@ const (
 	ELSE     = "ELSE"
 	RETURN   = "RETURN"
 	WHILE    = "WHILE"
+	MACRO    = "MACRO"
 )
 
 var keywords = map[string]TokenType{
