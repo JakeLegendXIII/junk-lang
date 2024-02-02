@@ -68,6 +68,7 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerPrefix(token.STRING, p.parseStringLiteral)       // register string literal parse function
 	p.registerPrefix(token.LBRACKET, p.parseArrayLiteral)      // register array literal parse function
 	p.registerPrefix(token.LBRACE, p.parseHashLiteral)         // register hash literal parse function
+	p.registerPrefix(token.MACRO, p.parseMacroLiteral)         // register macro literal parse function
 
 	p.infixParseFns = make(map[token.TokenType]infixParseFn) // initialize map
 	p.registerInfix(token.PLUS, p.parseInfixExpression)      // register infix expression parse function
@@ -161,6 +162,24 @@ func (p *Parser) parseGroupedExpression() ast.Expression {
 
 func (p *Parser) parseFunctionLiteral() ast.Expression {
 	lit := &ast.FunctionLiteral{Token: p.curToken} // initialize function literal
+
+	if !p.expectPeek(token.LPAREN) { // check next token type
+		return nil
+	}
+
+	lit.Parameters = p.parseFunctionParameters() // parse function parameters
+
+	if !p.expectPeek(token.LBRACE) { // check next token type
+		return nil
+	}
+
+	lit.Body = p.parseBlockStatement() // parse block statement
+
+	return lit
+}
+
+func (p *Parser) parseMacroLiteral() ast.Expression {
+	lit := &ast.MacroLiteral{Token: p.curToken} // initialize macro literal
 
 	if !p.expectPeek(token.LPAREN) { // check next token type
 		return nil
